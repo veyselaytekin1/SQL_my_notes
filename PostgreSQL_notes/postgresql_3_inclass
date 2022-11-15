@@ -1,0 +1,327 @@
+--TABLO OLUŞTURALIM:
+CREATE TABLE workers
+(
+    id SMALLINT,
+    name VARCHAR(50),
+    salary SMALLINT,
+    CONSTRAINT id4_pk PRIMARY KEY(id)
+);
+
+--RECORD DEGERLERİNİ GİRELİM:
+
+INSERT INTO workers VALUES(10001, 'Ali Can', 12000);
+INSERT INTO workers VALUES(10002, 'Veli Han', 2000);
+INSERT INTO workers VALUES(10003, 'Mary Star', 7000);
+INSERT INTO workers VALUES(10004, 'Angie Ocean', 8500);
+
+SELECT * FROM workers;
+
+--En düşük ve en büyük salary li recordları çağırılım:
+1.YOL:
+SELECT *          ---- record bütün field ları içerdiği için select *(all) denip bütün field lar çağrılır
+FROM workers   
+WHERE salary IN ((SELECT MAX (salary)FROM workers) , (SELECT MIN (salary)FROM workers));
+
+2.Yol:
+SELECT *
+FROM workers
+WHERE  salary = (SELECT MAX(salary) FROM workers) OR salary=( SELECT MIN(salary)FROM workers);
+
+
+--En yüksek salary degerini bulun: Bütün field ları değil belli bir fieldi çağırıyoruz
+SELECT MAX (salary) AS maximus_salary  -- AS ile Geçici bir field oluşturulur tabloyu çağırdığımızda gözükmez
+FROM workers;
+
+--En düşük salary degerini bulun:
+SELECT MIN (salary) AS minimum_salary  -- AS ile Geçici bir field oluşturulur tabloyu çağırdığımızda gözükmez
+FROM workers;
+
+
+-- Salary ortalamasını bulalım:
+SELECT AVG (salary) AS ort_salary
+FROM workers;
+
+-- Record adetini bulalım:
+SELECT COUNT (name) AS number_of_workers
+FROM workers;
+
+
+--Slary değerlerinin toplamını bulalım:
+SELECT SUM (salary) AS total_salary
+FROM workers;
+
+---INTERVIEW QUESTION:
+-- En yüksek ikinci salary değerini bulalım:
+SELECT MAX (salary)
+FROM workers
+WHERE salary < (SELECT MAX (salary) FROM workers);
+
+
+---INTERVIEW QUESTION:
+-- En yüksek ikinci salary değerini bulalım:İsim vererek çağıralım
+SELECT MAX (salary) AS second_highest_salary
+FROM workers
+WHERE salary < (SELECT MAX (salary) FROM workers);
+
+
+
+---INTERVIEW QUESTION:
+-- En düşük ikinci salary değerini bulalım:
+SELECT MIN (salary) AS second_lowest_salary
+FROM workers
+WHERE salary > (SELECT MIN (salary) FROM workers);
+
+
+---Interview question:
+-- En yüksek üçüncü salary değerini bulalım:
+SELECT MAX (salary) AS third_max_salary
+FROM workers
+WHERE salary < (SELECT MAX (salary) AS second_highest_salary
+                FROM workers
+                WHERE salary < (SELECT MAX (salary) FROM workers));
+
+---*******************ODEV:Interview question:*************************************
+-- En düşük üçüncü salary değerini bulalım:
+
+SELECT MIN (salary)
+FROM workers AS third_min_salary
+WHERE salary > (SELECT MIN (salary) AS second_lowest_salary
+                FROM workers
+                WHERE salary > (SELECT MIN (salary) FROM workers));
+
+
+SELECT*FROM workers;
+
+
+-- Salalry değeri en yüksek ikinci değere sahip recordu çağıralım. REcord çağırmak için bütün fielfler getirilr
+-- 1.YOL
+SELECT *
+FROM workers
+WHERE salary = (SELECT MAX (salary) AS second_highest_salary
+                FROM workers
+                WHERE salary < (SELECT MAX (salary) FROM workers));
+
+--2.YOL:
+SELECT *
+FROM workers  -- ORDER BY sort yani sıralama yapr
+ORDER BY salary DESC    --descendin yani azalan sıralama tersi ascending
+OFFSET 1 ROW             -- bir satır atla demek
+FETCH NEXT 1 ROW ONLY;   -- bir sonraki bir satırı yakala getir
+
+--**ODEV: Salary değeri en düşük ikinci değere sahip recordu çağıralım***** 1. ve 2. yol ile****
+--1.YOL:
+SELECT *
+FROM workers
+WHERE salary = (SELECT MIN (salary) AS second_lowest_salary
+                FROM workers
+                WHERE salary > (SELECT MIN (salary) FROM workers));
+
+--2.YOL:
+SELECT *
+FROM workers
+ORDER BY salary ASC   -- Bu artar sırlama ile sort eder
+OFFSET 1 ROW            -- ilk satıırı atla
+FETCH NEXT 1 ROW ONLY;   -- sıradki 1 satırı getir
+
+
+
+-- ** Salary değeri en yüksek üçüncü olan recordu çağırın 1 ve 2 yolla yapalım***
+--1.YOL:
+
+SELECT *
+FROM workers
+WHERE  salary = (SELECT MAX (salary) AS third_max_salary
+                FROM workers
+                WHERE salary < (SELECT MAX (salary) AS second_highest_salary
+                FROM workers
+                WHERE salary < (SELECT MAX (salary) 
+                FROM workers)));
+
+
+--2.Yol:
+
+SELECT *
+FROM workers
+ORDER BY salary DESC
+OFFSET 2 ROW
+FETCH NEXT 1 ROW ONLY;    --iki satır atla sonraki bir satırı al
+
+----------------------------------------------------------
+---TABLO OLUŞTURALIM:
+CREATE TABLE customers_products
+(
+  product_id CHAR(10),
+  customer_name VARCHAR(50),
+  product_name VARCHAR(50)
+);
+INSERT INTO customers_products VALUES (10, 'Mark', 'Orange');
+INSERT INTO customers_products VALUES (10, 'Mark', 'Orange');
+INSERT INTO customers_products VALUES (20, 'John', 'Apple');
+INSERT INTO customers_products VALUES (30, 'Amy', 'Palm');
+INSERT INTO customers_products VALUES (20, 'Mark', 'Apple');
+INSERT INTO customers_products VALUES (10, 'Adem', 'Orange');
+INSERT INTO customers_products VALUES (40, 'John', 'Apricot');
+INSERT INTO customers_products VALUES (20, 'Eddie', 'Apple');
+
+-- Product_name degeri Orange Apple ya da Palm olan recordları çağıralım:
+--1.YOL
+SELECT *
+FROM customers_products
+WHERE product_name= 'Orange' OR product_name='Apple' OR product_name='Palm';
+
+--2.YOL
+SELECT *
+FROM customers_products
+WHERE product_name IN ('Orange', 'Apple', 'Palm');  -- product_name içinde apple orange palm olanları
+
+
+--3.YOL
+SELECT *
+FROM customers_products
+WHERE product_name NOT IN ('Apricot');  -- product_name içinde Apricot olmayanları
+
+
+--BETWEEN condition:
+--Product_id <=30 veya >=20  -- Bu aralık BETWEEN ile söylenir
+--1.YOL
+SELECT *
+FROM customers_products
+WHERE product_id <='30' AND product_id >='20'   ;
+
+--2.YOL
+SELECT *
+FROM customers_products
+WHERE product_id BETWEEN '20' AND '30';    -- string ile number uyumsuz olmasın diye ya 
+                                            -- veri türünü değiştircektik ya da burdaki gibi '' kullancacaz
+                                            -- 20 30 dahil
+
+
+--product_id >25 veya <20
+
+--1.YOL
+SELECT *
+FROM customers_products
+WHERE product_id <'20' AND product_id >'25'   ;
+
+--2.YOL
+SELECT *
+FROM customers_products
+WHERE product_id NOT BETWEEN '20' AND '25';
+
+--EXISTS Condition - EXISTS Condition 'Subquery' ile kullanılır.
+--                   Eğer Subquery herhangi bir data çağırırsa 'Outer Query'--Main Ana query çalıştırılır.
+--                   Eğer Subquery herhangi bir data çağırmazsa 'Outer Query' çalıştırılmaz.
+--                   EXISTS Condition Select, Insert, Update, Delete komutlarında kullanılabilir.
+-- NOT:subquery python daki önceden yapılan degişken ataması gibidir.
+----------------------------------------------------------------------------------
+
+
+CREATE TABLE customers_likes
+(
+  product_id CHAR(10),
+  customer_name VARCHAR(50),
+  liked_product VARCHAR(50)
+);
+INSERT INTO customers_likes VALUES (10, 'Mark', 'Orange');
+INSERT INTO customers_likes VALUES (50, 'Mark', 'Pineapple');
+INSERT INTO customers_likes VALUES (60, 'John', 'Avocado');
+INSERT INTO customers_likes VALUES (30, 'Lary', 'Cherries');
+INSERT INTO customers_likes VALUES (20, 'Mark', 'Apple');
+INSERT INTO customers_likes VALUES (10, 'Adem', 'Orange');
+INSERT INTO customers_likes VALUES (40, 'John', 'Apricot');
+INSERT INTO customers_likes VALUES (20, 'Eddie', 'Apple');
+
+SELECT * FROM customers_likes;
+
+
+--Customer_name değerleri arasında Lary varsa tüm Ccustomer_name degerlerini "No name"
+-- olarak guncelle
+UPDATE customers_likes
+SET customer_name = 'No name'
+WHERE EXISTS (SELECT customer_name FROM customers_likes WHERE customer_name= 'Lary');
+
+-- Yukarıda EXIST içinde bir data varsa işlem yapar
+--VEYA
+UPDATE customers_likes
+SET customer_name = 'No name'
+WHERE EXISTS (SELECT product_id FROM customers_likes WHERE customer_name= 'Lary');
+
+
+
+--Liked_product değerleri arasında Orange , Pineapple,  ya da Avacado varsa name degerlerini no name
+--olarak guncelle
+UPDATE customers_likes
+SET customer_name = 'No name'
+WHERE EXISTS (SELECT customer_name FROM customers_likes WHERE liked_product IN ( 'Orange','Pineapple', 'Avocado'));
+
+
+--Product name değerleri arasında Orange olan varsa tüm recordları silelim:
+DELETE FROM customers_likes
+WHERE EXISTS (SELECT liked_product FROM customers_likes WHERE liked_product= 'Orange')
+
+SELECT * FROM customers_likes;
+
+--------------------------------------------------------------------------------------------------
+
+
+--SUBQUERY TABLE:
+CREATE TABLE employees
+(
+  id CHAR(9),
+  name VARCHAR(50),
+  state VARCHAR(50),
+  salary SMALLINT,
+  company VARCHAR(20)
+);
+INSERT INTO employees VALUES(123456789, 'John Walker', 'Florida', 2500, 'IBM');
+INSERT INTO employees VALUES(234567890, 'Brad Pitt', 'Florida', 1500, 'APPLE');
+INSERT INTO employees VALUES(345678901, 'Eddie Murphy', 'Texas', 3000, 'IBM');
+INSERT INTO employees VALUES(456789012, 'Eddie Murphy', 'Virginia', 1000, 'GOOGLE');
+INSERT INTO employees VALUES(567890123, 'Eddie Murphy', 'Texas', 7000, 'MICROSOFT');
+INSERT INTO employees VALUES(456789012, 'Brad Pitt', 'Texas', 1500, 'GOOGLE');
+INSERT INTO employees VALUES(123456710, 'Mark Stone', 'Pennsylvania', 2500, 'IBM');
+
+SELECT * FROM employees;
+
+
+--QUERY TABLE:
+CREATE TABLE companies
+(
+  company_id CHAR(9),
+  company VARCHAR(20),
+  number_of_employees SMALLINT
+);
+INSERT INTO companies VALUES(100, 'IBM', 12000);
+INSERT INTO companies VALUES(101, 'GOOGLE', 18000);
+INSERT INTO companies VALUES(102, 'MICROSOFT', 10000);
+INSERT INTO companies VALUES(103, 'APPLE', 21000);
+SELECT * FROM companies;
+
+
+--Number_of_employees degeri 1500 den buyuk olan name -üsteki tabloda- 
+--ve company degerleirni çağırın
+-- Üsteki tabloda 1500 den büyük olan recorların company leri aşağıdaki tablodan çağrılır.
+--İki tablonunu ortak yönü company içermeleridir.
+
+SELECT name, company
+FROM employees
+WHERE company IN (SELECT company FROM companies WHERE number_of_employees >15000  );
+
+
+
+-- Florida da bulunan company_id ve company degerlerini çağıralım:
+
+SELECT company, company_id
+FROM companies
+WHERE company IN (SELECT company FROM employees WHERE state = 'Florida');
+
+-- Company_id degeri 100 den buyuk olan name ve state, company degerlerini çağıralım:
+
+SELECT name , state,company
+FROM employees
+WHERE company IN (SELECT company FROM companies WHERE company_id > '100');
+
+
+
+
+

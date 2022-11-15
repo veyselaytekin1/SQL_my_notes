@@ -1,0 +1,275 @@
+
+CREATE TABLE points
+(
+    name VARCHAR(50),
+    point SMALLINT
+);
+INSERT INTO points values('Ali', 25);
+INSERT INTO points values('Veli', 37);
+INSERT INTO points values('Kemal', 43);
+INSERT INTO points values('Ali', 36);
+INSERT INTO points values('Ali', 25);
+INSERT INTO points values('Veli', 29);
+INSERT INTO points values('Ali', 45);
+INSERT INTO points values('Veli', 11);
+INSERT INTO points values('Ali', 125);
+
+SELECT * FROM points
+
+--Recordları azalan düzende "name" sütununa göre ve artan düzende "points" sütununa göre sırala.
+SELECT *
+FROM points
+ORDER BY name DESC, point;      ---default zaten ASC olduğu için yazmaya gerek yok 
+
+SELECT *
+FROM points
+ORDER BY name DESC, point ASC;   -- yukarıdaki ile aynı
+--------------------------------------------------------------------------------------------
+
+
+--ALIASES: AS
+--TAble isimleri için Alias yi Nasıl Kullanırız:
+--NOT: ALIAS NICKNAME TAKMA AD KISA AD (Osman Bey)
+
+CREATE TABLE employees
+(
+  employee_id CHAR(9),
+  employee_first_name VARCHAR(20),
+  employee_last_name VARCHAR(20)
+);
+INSERT INTO employees VALUES(14, 'Chris', 'Tae');
+INSERT INTO employees VALUES(11, 'John', 'Walker');
+INSERT INTO employees VALUES(12, 'Amy', 'Star');
+INSERT INTO employees VALUES(13, 'Brad', 'Pitt');
+INSERT INTO employees VALUES(15, 'Chris', 'Way');
+SELECT * FROM employees;
+
+
+
+CREATE TABLE addresses
+(
+  employee_id CHAR(9),
+  street VARCHAR(20),
+  city VARCHAR(20),
+  state CHAR(2),
+  zipcode CHAR(5)
+);
+INSERT INTO addresses VALUES(11, '32nd Star 1234', 'Miami', 'FL', '33018');
+INSERT INTO addresses VALUES(12, '23rd Rain 567', 'Jacksonville', 'FL', '32256');
+INSERT INTO addresses VALUES(13, '5th Snow 765', 'Hialeah', 'VA', '20121');
+INSERT INTO addresses VALUES(14, '3rd Man 12', 'Weston', 'MI', '12345');
+INSERT INTO addresses VALUES(15, '11th Chris 12', 'St. Johns', 'FL', '32259');
+SELECT * FROM addresses;
+
+
+--employee_first_name ve state değerlerini çağırın. 
+--employee_first_name sütunu için "firstname", state sütunu için "employee state"  isimlerini kullanın.
+
+SELECT e.employee_first_name AS firstname, a.state AS "employee state"  
+FROM employees e, addresses a
+WHERE e.employee_id = a.employee_id;
+
+--NOT: e. e harfi ile başlayan a. a harfi ile başlayan tabloyu temsil ediyor. Daha okunabilir kod için.
+--NOT: isimleri "" içine alınca kelimeler arsına _ işareti koymaya gerek kalmıyor
+
+
+
+-- TEK BİR SUTUNA ÇOKLU SUTUN Nasıl konulur ve Alias nsıl kullanılır?
+
+--employee_id değerlerini "id" adıyla,  employee_first_name ve employee_last_name değerlerini 
+--tek sütunda "full_name" adıyla çağırın.(iki sutunu concatenate yapcaz || işaretini kullancaz)
+
+SELECT employee_id AS id , employee_first_name || ' ' || employee_last_name AS full_name
+FROM employees;
+
+-----------------------------------------
+
+
+
+--GROUP BY
+
+CREATE TABLE workers
+(
+  id CHAR(9),
+  name VARCHAR(50),
+  state VARCHAR(50),
+  salary SMALLINT,
+  company VARCHAR(20)
+);
+INSERT INTO workers VALUES(123456789, 'John Walker', 'Florida', 2500, 'IBM');
+INSERT INTO workers VALUES(234567890, 'Brad Pitt', 'Florida', 1500, 'APPLE');
+INSERT INTO workers VALUES(345678901, 'Eddie Murphy', 'Texas', 3000, 'IBM');
+INSERT INTO workers VALUES(456789012, 'Eddie Murphy', 'Virginia', 1000, 'GOOGLE');
+INSERT INTO workers VALUES(567890123, 'Eddie Murphy', 'Texas', 7000, 'MICROSOFT');
+INSERT INTO workers VALUES(456789012, 'Brad Pitt', 'Texas', 1500, 'GOOGLE');
+INSERT INTO workers VALUES(123456710, 'Mark Stone', 'Pennsylvania', 2500, 'IBM');
+SELECT * FROM workers;
+
+
+
+--Her bir  name değeri için toplam salary değerlerini bulun.
+
+SELECT name, SUM(salary) AS total_salary
+FROM workers
+GROUP BY name
+ORDER BY total_salary DESC;       --tercihe bağlı sıralayabilirz de
+
+
+---Osman Bey'den:
+--NOT: DML islem sadece TABLONUN datasini degistirir. Neydi DML ler --> INSERT , UPDATE , DELETE
+--NOT: DDL --> drop , create  ..
+--NOT: DQL --> Data Query LAnguage
+
+
+--Her bir state değeri için çalışan sayısını bulup azalan düzende sıralayınız.
+SELECT state, COUNT(state) AS num_of_employee  --COUNT(state): state leri sayar. 
+FROM workers                                    --Niye state aldık çünkü tabloda her recordda 
+GROUP BY state                                  --bir çalışan var akaşılarında stateleri yazıyor 
+ORDER BY num_of_employee DESC;                  --dolayısıyla state sayısı aynı zamanda çalışan sayısı demek.
+                         
+
+
+--Her bir company için 2000$ üzeri maaş alan çalışan sayısını bulun.
+SELECT company, COUNT (company) AS "Number os Workers"
+FROM workers
+WHERE salary > 2000
+GROUP BY company;
+
+
+--Her bir company için en düşük ve yüksek salary değerlerini bulun.
+SELECT company, MIN(salary) AS min_salary, MAX(salary) AS max_salary
+FROM workers
+GROUP BY company;
+
+
+--HAVING Clauses: GROUP BY dan sonra WHERE in çalışmayışı sebebiyle kullanılır.
+--Where ardından SUM(), MIN(), MAX(), COUNT(), AVG() gibi aggregrate functionlar kullanılamaz.
+
+--Toplam salary değeri 2500 üzeri olan her bir çalışan için salary toplamını bulun.
+-- Burada SELECT sonrası gelecek şey aslında sorudaki kim için sorusunun cevabıdır.
+
+SELECT name, SUM(salary) AS "Total Salary"
+FROM workers
+GROUP BY name
+WHERE salary > 2500     -- çalışmaz MANTIĞI NEDİR?????
+
+SELECT name, SUM(salary) AS "Total Salary"
+FROM workers
+GROUP BY name
+HAVING SUM (salary) > 2500;   -- şeklinde HAVING kullanılır
+
+
+ --Birden fazla çalışanı olan, her bir state için çalışan toplamlarını bulun.
+SELECT state, COUNT(state) AS num_of_employees
+FROM workers
+GROUP BY state
+HAVING COUNT (state);  --1) HAVING, GROUP BY ardından filtreleme içim kullanılır.
+                       --2) HAVING ardından aggregate funcntion kullanmalıyız
+                       --sütun adı(field name) kullanamayız.
+
+--Her bir company için değeri 2000'den fazla olan minimum salary değerlerini bulun.
+SELECT company, MIN(salary) AS min_salary
+FROM workers
+GROUP BY company
+HAVING MIN(salary) > 2000;
+
+--Her bir state için değeri 3000'den az olan maximum salary değerlerini bulun.
+SELECT state, MAX(salary) AS max_salary
+FROM workers
+GROUP BY state
+HAVING MIN(salary) < 3000;
+----------------------------------------------------------------------------------
+
+
+-- UNION Operator: 1) İki sorgu (query) sonucunu birleştirmek için kullanılır.(Tekrar varsa kaldırır unique yapar)
+                   --2)Unique (tekrarsız) recorldları verir.(soruda da tekrarsı olarak bulun ifadesi yer alıyor)
+                   --3)Tek bir sutuna çok sutun koyabiliriz.
+                   --4)Tek bir sutuna çok sutun koyarken data tipleri aynı olmalı data boyutları kapasiteyi aşmamalı
+
+--salary değeri 3000'den yüksek olan state değerlerini 
+--ve 2000'den küçük olan name değerlerini tekrarsız olarak bulun.
+SELECT state AS "State/Name", salary
+FROM workers
+WHERE salary > 3000
+
+UNION                  --- ortaya UNION yazıyoruz.
+
+SELECT name, salary
+FROM workers
+WHERE salary < 2000;
+
+
+--salary değeri 3000'den yüksek olan state değerlerini ve 
+--2000'den küçük olan name değerlerini tekrarlı olarak bulun.
+
+SELECT state AS "State/Name", salary
+FROM workers
+WHERE salary > 3000
+
+UNION ALL                  --- Tekrarlı recorları verir. ortaya UNION ALL yazıyoruz.
+
+SELECT name, salary
+FROM workers
+WHERE salary < 2000;
+
+----------------------------------------------------------------------------------------
+
+
+--INTERSECT: iki sorgu sonucunun ortak degerlerini verir. Unique (tekrarsız) recordları verir
+
+
+--salary değeri 1000'den yüksek, 2000'den az olan "ortak" name değerlerini bulun.
+SELECT name AS "State/Name", salary
+FROM workers
+WHERE salary > 1000
+
+INTERSECT                  --- Çakışanları getirir. 
+
+SELECT name, salary
+FROM workers
+WHERE salary < 2000;
+
+
+--salary değeri 2000'den az olan ve company değeri 
+--IBM, APPLE yada MICROSOFT olan ortak "name" değerlerini bulun.
+SELECT name 
+FROM workers
+WHERE salary < 2000
+
+INTERSECT                  --- Çakışanları getirir. 
+
+SELECT name
+FROM workers
+WHERE company IN ('IBM', 'APPLE', 'MICROSOFT');
+
+------------------------------------------------------------------
+
+
+--EXCEPT (MINUS-oracle da) Operator: Bir sorgu sonucundan başka bir sorgu sonucuu çıkarmak için kullanılır
+                                  -- Unique (tekrarsız) recordları verir
+                                  
+--salary değeri 3000'den az ve GOOGLE'da çalışmayan  name değerlerini bulun.
+SELECT name
+FROM workers
+WHERE salary < 3000
+
+EXCEPT   --Çıkarma işlemi yapar. 3000 den az alan çalışan sayısından google da çalışaları çıkardık
+                                  
+SELECT name
+FROM workers
+WHERE company ='GOOGLE'
+                                  
+
+
+-------------------------------İki table ile çalışılırsa------------------------------
+
+--JOINS:
+--1) INNER JOIN: Ortak (common) dataları verir (kesişim kumesi)     A n B
+--2) LEFT JOIN: Birinci table ın tüm datasını verir.                A
+--2) RIGHT JOIN: İkinci table nin tüm datasını verir.               B
+--4)FULL JOIN: İki table in tüm datasını verir.                     AUB
+--5) SELF JOIN: TEk table üzerinde çalışılırken iki table varmış gibi çalıştırılır.     
+
+
+
+
