@@ -5,7 +5,7 @@
 CREATE TABLE students
 (id varchar(4) ,
 students_name varchar(50),
-students_age varchar(25) ,
+students_age varchar(3) ,
 students_dob date
 );
 
@@ -20,8 +20,8 @@ select * from students
 
 /*
 ==============================================
-       column  sütun ismi degistirme 
-==============================================*/
+       column yani  sütun ismi degistirme 
+============================================== */
 ALTER TABLE students 
 RENAME COLUMN sutudents_name TO students_name;
 
@@ -52,8 +52,11 @@ after students_name;
 select * from students
 
 
+-- birde students_name_date sütununa id ekleyeyim, cümkü id yi foreign key olarak alacam biraz sonra ..BUNU YAPAMADIM :) 
 
 
+
+-- alter tableden hem sütun ismi degistirdik hemde sütun ekledik,ve contraint ekledik
 
 
 /*
@@ -62,6 +65,54 @@ select * from students
 ==============================================*/
 alter table students
 add constraint id_pk primary key(id, students_tel);
+
+
+select * from students
+
+
+
+
+
+
+
+/*
+==============================================
+     FOREIGN KEY ATAMASI YAPALIM
+==============================================*/
+-- önce foreign yapacagimiz tabloyu olusturalim
+
+create table parents
+(
+id varchar(4),
+parent_name varchar(50),
+phone_number char(11)
+);
+ALTER TABLE parents ADD CONSTRAINT FOREIGN KEY(id) REFERENCES students(id);
+-- solda parent'in üzerine sagtiklayip alter table yapip ordanda excel gibi degistirebilirsin
+
+
+select * from parents
+
+
+
+
+
+
+
+
+/*
+==============================================
+     CHECK CONSTRAINT ATAMASI YAPALIM
+==============================================*/
+-- normal ilk tablo yaparkende olusturabilirsin, veya olusturulmus bir tabloya akleme yapabilirsin
+
+ALTER TABLE students
+ADD CHECK (students_age>15);
+
+
+
+
+
 
 
 
