@@ -19,6 +19,10 @@ CREATE TABLE Kitaplar2 (
 
 -- Kitaplar2 tablosuna yeni bir sutun eklemek icin kullaniyoruz 
 -- Alter komutunu veri güncellerken degil, obje degistirirken kullaniyoruz.Alter anlami degistirmek demek
+-- Tabloyla ilgili degisikliklerde kullaniyoruz
+-- Veri degistirmek istersen, UPDATE komutunu kullaniyoruz
+
+-- Kitaplar2 tablosuna yeni bir sutun eklemek icin kullaniyoruz 
 ALTER TABLE Kitaplar2 ADD SayfaSayisi SMALLINT
 
 
@@ -209,7 +213,7 @@ UNION
 SELECT Ad, Soyadi FROM TblKisiler
 
 -- bu sekilde yaptigimiz zamanda iki tabloyu birlestiriyor ve ayni olanlari tek bir satir olarak aliyor
--- aslinda iki tabloyu tekbir rablo olarak birlestirmek istersek bunu kullaniyoruz
+-- aslinda iki tabloyu tekbir tablo olarak birlestirmek istersek bunu kullaniyoruz
 
 
 SELECT OgrAdi, OgrSoyadi FROM TblOgrenci
@@ -249,7 +253,7 @@ WHERE UrunID = 1
 
 
 ----------------------------------------------------------------------------------
--- Urun ID si 1 olan satirin birim fiyatii en yüksek degere güncelle
+-- Urun ID si 1 olan satirin birim fiyati en yüksek degere güncelle
 -- Max degeri kullanmak
 
 UPDATE Urunler
@@ -257,9 +261,24 @@ SET BirimFiyati = (SELECT MAX(BirimFiyati) FROM Urunler)
 WHERE UrunID = 1
 
 -- urunleriden birim fiyatlarini görüntüle, ve bunlarin MAX olani al ve onuda = ile esitliyoruz
--- Galiba sorgu icinde dorgu yapiyoruz
+-- Galiba sorgu icinde sorgu yapiyoruz
 
 SELECT * FROM Urunler
 
-SELECT HedefStokDuzeyi  FROM Urunler
-WHERE HedefStokDuzeyi= MAX(HedefStokDuzeyi)
+
+
+--=====================================================================================
+--   Aggregate Fonksiyonlari
+--=====================================================================================
+
+--  1- COUNT FONKSIYONU
+
+
+
+
+
+
+
+
+
+
